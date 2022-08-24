@@ -1,0 +1,6 @@
+#repository-results {
+	overflow: scroll;
+	border: thin #000 solid;
+	padding: 5px;
+	visibility: hidden;
+}

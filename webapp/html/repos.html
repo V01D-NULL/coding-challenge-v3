@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset='utf-8'>
-	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Repository search</title>
-	<meta name='viewport' content='width=device-width, initial-scale=1'>
-	<link rel='stylesheet' type='text/css' media='screen' href='generic.css'>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" media="screen" href="repos.css">
 </head>
 <body>
-	<form action="repositories" method="get" id="view-repo-form">
-		<input type="text" name="username" id="username"/>
+	<!-- Search form -->
+	<form action="api/repositories" method="get" id="view-repo-form">
+		<!-- <p></p> -->
+		<input placeholder="Enter a username.." type="text" name="username" id="username"/>
 		<input type="submit" value="Submit"/> 
 	</form>
-	<script src='form.js'></script>
+	
+	<!-- Search results -->
+	<div id="repository-results"></div>
+
+	<!-- Scripts -->
+	<script src="repository_search.js"></script>
 </body>
 </html>

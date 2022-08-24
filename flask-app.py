@@ -1,4 +1,4 @@
-from readline import replace_history_item
+# from json import 
 from sys import exit
 from typing import Final
 
@@ -36,20 +36,29 @@ def download_file(filename: str):
 	return send_from_directory(path, filename)
 
 
-@flask_app.route('/repositories', methods=['GET'])
+@flask_app.route('/api/repositories', methods=['GET'])
 def route_repos():
 	args = request.args
 
-	# Invalid arguments?
+	# Missing required arguments?
 	print(args.to_dict())
 	if len(args.to_dict()) == 0:
-		return jsonify({'Error: Missing required arguments': 0})
+		return jsonify({'error': 0})
 
+	# Username limit exceeded?
 	username = args.get('username')
 	if len(username) > USERNAME_MAX_LEN:
-		return jsonify({'Error: Username limit exceeded': 1})
+		return jsonify({'error': 1})
 	
-	repos = github_api.repos.list_for_user(username=username)	
+	repos = github_api.repos.list_for_user(username=username)
+
+	# Does this user exist?
+	try:
+		repos.json['message']
+		return jsonify({'error': 2})
+	except TypeError:
+		pass
+	
 	return repos.json
 
 if __name__ == '__main__':	

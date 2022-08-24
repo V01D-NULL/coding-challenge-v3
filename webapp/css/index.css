@@ -1,5 +1,14 @@
+h1 {
+	text-align: center;
+}
+
 body {
 	background-image: url('background.jpeg');
 	background-repeat: no-repeat;
 	background-size: cover;
+}
+
+p {
+	font-size: large;
+	text-align: center;
 }
