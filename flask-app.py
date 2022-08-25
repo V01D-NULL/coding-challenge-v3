@@ -1,4 +1,5 @@
 # from json import 
+from operator import contains
 from sys import exit
 from typing import Final
 
@@ -11,7 +12,7 @@ except ImportError:
 
 from flask import Flask, jsonify, request, render_template, send_from_directory
 
-# Character limits taken from:
+# Character limit taken from:
 # https://textcleaner.net/character-count/
 USERNAME_MAX_LEN: Final[int] = 39
 
@@ -31,7 +32,7 @@ def download_file(filename: str):
 			return send_from_directory("meta/res/", filename)
 	
 	# Folders have the same name as the file extension.
-	# As a result returning a file is relatively quick:
+	# As a result determining which file to load is relatively fast:
 	path = f"webapp/{filename.split('.')[1]}"
 	return send_from_directory(path, filename)
 
@@ -52,14 +53,26 @@ def route_repos():
 	
 	repos = github_api.repos.list_for_user(username=username)
 
-	# Does this user exist?
-	try:
-		repos.json['message']
+	# Check if the user exists.
+	#
+	# Note: From my observations, github's API uses
+	# "message" only when something unexpected occurred
+	if contains(repos.json, "message"):
 		return jsonify({'error': 2})
-	except TypeError:
-		pass
+	
+	# Does this user have any public repos?
+	if len(repos.json) == 0:
+		return jsonify({'error': 3})
 	
 	return repos.json
+
+@flask_app.route('/api/comment', methods=['POST'])
+def route_comment():
+	comment = request.data.decode()
+	print(comment)
+
+	return f'Data:\n\n{comment}\n'
+
 
 if __name__ == '__main__':	
 	flask_app.run(debug=True)

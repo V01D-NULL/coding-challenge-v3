@@ -19,7 +19,7 @@ async function viewRepository(username) {
 const JsonToObject = (data) => JSON.parse(JSON.stringify(data));
 
 function verifyJson(data) {
-	const errors = ['Missing required arguments', 'Username character limit exceeded (Max: 39)', 'No such username'];
+	const errors = ['Missing required arguments', 'Username character limit exceeded (Max: 39)', 'No such username', 'This user has no public repositories'];
 	
 	const jsonObj = JsonToObject(data);
 
