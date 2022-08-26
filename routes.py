@@ -43,7 +43,7 @@ def route_signup():
 	password = request.args.get('password')
 	
 	if not account_exists(username):
-		database.create(key='login', data={'username': username, 'password': password})
+		account_create(username, password)
 		session['logged_in'] = True
 		return jsonify({'success': True})
 
