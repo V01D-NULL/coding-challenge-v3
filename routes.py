@@ -1,4 +1,3 @@
-from datetime import time
 import json
 from database import database
 from operator import contains
@@ -59,14 +58,48 @@ def route_repos():
 	
 	return repos.json
 
+@flask_app.route('/api/rate', methods=['POST', 'GET'])
+def route_rate():
+	name = request.args.get('name')
+	like_status = database.read(key='rate', query={'name': name})
+	
+	if request.method == 'POST':
+		like_type = 'Liked'
+		if like_status is not None:
+			like_type = 'Liked' if like_status['like'] == 'Disliked' else 'Disliked'
+			database.update(key='rate', query={'name': name}, data={"$set":{'like':like_type}})
+		else:
+			database.create(key='rate', data={'name': name, 'like': like_type})
+		
+		return jsonify({'like': like_type})
+
+	# GET
+	if like_status is None or like_status['like'] is None:
+		return jsonify({'like':'No like or dislike'})
+
+	# print(jsonify(like_status))
+	return jsonify({'like': like_status['like']})
+
 @flask_app.route('/api/comment', methods=['POST', 'DELETE', 'GET'])
 def route_comment():
-	name = request.args.get('name')
 	id = request.args.get('id')
+	name = request.args.get('name')
+	edit = request.args.get('edit')
 
 	if request.method == 'POST':
+		if id is None or name is None:
+			return
+		
 		comment = request.data.decode()
-		database.create(key='comment', data={'name': name, 'id': id, 'comment': comment})
+		if edit is None:
+			database.create(key='comment', data={'name': name, 'id': id, 'comment': comment})
+		else:
+			database.update(key='comment', query={'name': name, 'id': id}, data={
+					"$set":{
+						'comment':comment
+					}
+				})
+
 		return jsonify({})
 
 	elif request.method == 'DELETE':

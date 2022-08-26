@@ -24,7 +24,7 @@ class CRUD:
 		
 		# Do we need to query multiple items?
 		if key != 'comment':
-			return False if handle.find_one(query) is None else True
+			return handle.find_one(query)
 
 		# We do, retrieve all items in the collection that match the query.
 		result = list(dict())
@@ -36,8 +36,12 @@ class CRUD:
 		
 		return result
 
-	def update(self) -> None:
-		pass
+	def update(self, key: str, query: dict, data: dict) -> None:
+		handle = self.database_collection.get(key)
+		if handle is None:
+			return
+
+		handle.update_one(query, data)
 
 	def delete(self, key: str, query: dict) -> bool:
 		handle = self.database_collection.get(key)

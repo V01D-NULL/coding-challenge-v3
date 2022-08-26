@@ -27,6 +27,11 @@ function apiSubmitComment(username, repo) {
 }
 
 function apiDeleteComment(name, id) {
+	if (id == undefined || id == null) {
+		console.error("Tried to delete comment with an undefined or null id!");
+		return;
+	}
+	
 	const requestType = {
 		method: 'DELETE',
 		headers: {
@@ -38,7 +43,41 @@ function apiDeleteComment(name, id) {
 		if (!verifyJson(data))
 			return;
 
+		// Naming convention: username_repo
 		const [username, repo] = name.split('_');
-		viewComments(username, repo)
+		refreshComments(username, repo);
 	});
+}
+
+function apiEditComment(name, id) {
+	if (id == undefined || id == null) {
+		console.error("Tried to edit comment with an undefined or null id!");
+		return;
+	}
+
+	ResetPopup();
+	popup['div'].children.namedItem('submit-comment').addEventListener("click", event => {
+		const requestType = {
+			method: 'POST',
+			body: popup['div'].children.namedItem('comment-box').value,
+			headers: {
+				"Content-type": "application/text; charset=UTF-8"
+			}
+		};
+
+		const [username, repo] = name.split('_');
+		apiRequest(`/api/comment?name=${username}_${repo}&id=${id}&edit=1`, requestType).then(_ => refreshComments(username, repo));
+	});
+}
+
+function apiUpdateLikeStatus(username, repo) {
+	const requestType = {
+		method: 'POST',
+		body: popup['div'].children.namedItem('comment-box').value,
+		headers: {
+			"Content-type": "application/text; charset=UTF-8"
+		}
+	};
+
+	apiRequest(`/api/rate?name=${username}_${repo}`, requestType).then(_ => refreshRepositories(username));
 }
