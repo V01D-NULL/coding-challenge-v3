@@ -45,6 +45,24 @@
 	cursor: pointer;
 }
 
+#log-out {
+	float: right;
+	color: cornflowerblue;
+}
+
+#log-out:hover {
+	cursor: pointer;
+}
+
+#home {
+	float: right;
+	color: cornflowerblue;
+}
+
+#home:hover {
+	cursor: pointer;
+}
+
 @media screen and (max-width: 500px) {
 	#popup {
 		left: 20%;

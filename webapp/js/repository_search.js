@@ -37,12 +37,11 @@ function viewRepositories(username) {
 		resultsDiv.style.visibility = 'visible';
 		resultsDiv.innerHTML = '';
 		
-		if (!verifyJson(data))
-			return;
-		
 		// Iterate over each repository
 		data.forEach(element => {
 				const jsonObj = JsonToObject(element);
+
+				// Request the "like status" of every repository
 				apiRequest(`/api/rate?name=${username}_${jsonObj.name}`).then(like => {
 
 				resultsDiv.innerHTML +=

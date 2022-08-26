@@ -1,9 +1,12 @@
 "use strict";
 
-async function apiRequest(url, requestArguments) {
+async function apiRequest(url, requestArguments, verify=true) {
 	const data = await fetch(url, requestArguments)
 	.then((response) => response.json())
 	.then(data => {
+		if (verify)
+			if (!verifyJson(data))
+				return undefined;
 		return data;
 	})
 	.catch(error => {
@@ -40,9 +43,6 @@ function apiDeleteComment(name, id) {
 	};
 
 	apiRequest(`/api/comment?name=${name}&id=${id}`, requestType).then(data => {
-		if (!verifyJson(data))
-			return;
-
 		// Naming convention: username_repo
 		const [username, repo] = name.split('_');
 		refreshComments(username, repo);
@@ -80,4 +80,34 @@ function apiUpdateLikeStatus(username, repo) {
 	};
 
 	apiRequest(`/api/rate?name=${username}_${repo}`, requestType).then(_ => refreshRepositories(username));
+}
+
+function apiSubmitCredentials(id, apiEndpoint, callback) {
+	const username = document.getElementById(id).children.namedItem('username').value;
+	const password = document.getElementById(id).children.namedItem('password').value;
+
+	const requestType = {
+		method: 'POST',
+		headers: {
+			"Content-type": "application/text; charset=UTF-8"
+		}
+	};
+	
+	apiRequest(`/api/${apiEndpoint}?username=${username}&password=${password}`, requestType, false).then(data => {
+		if (!data.success)
+			alert(data.error);
+		else
+			callback();
+	});
+}
+
+function apiRevokeCredentials() {
+	const requestType = {
+		method: 'POST',
+		headers: {
+			"Content-type": "application/text; charset=UTF-8"
+		}
+	};
+
+	apiRequest(`/api/logout`, requestType, false).then(_ => alert("Successfully logged out"));
 }

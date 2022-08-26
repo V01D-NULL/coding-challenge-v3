@@ -9,8 +9,12 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="animation.css">
 </head>
 <body>
+	<span id="home" onclick="window.location.href = 'index.html'">Home</span>
+	<br>
+	<span id="log-out" onclick="apiRevokeCredentials()">Logout</span>
+
 	<!-- Search form -->
-	<form action="api/repositories" method="get" id="view-repo-form">
+	<form action="api/repositories" method="GET" id="view-repo-form">
 		<input placeholder="Enter a username.." type="text" name="username" id="username"/>
 		<input type="submit" value="Submit"/> 
 	</form>
@@ -25,9 +29,7 @@
 		<button name="submit-comment">Submit</button>
 		<span id="close-popup" onclick="EnablePopup(false)">&times;</span>
 	</div>
-	
-	<div id="foo">
-	</div>
+
 
 	<!-- Scripts -->
 	<script src="repository_search.js"></script>

@@ -10,14 +10,15 @@ class CRUD:
 		self.database_connection = client.api
 		self.database_collection = dict({
 			'comment': self.database_connection.comments,
-			'rate': self.database_connection.ratings
+			'rate': self.database_connection.ratings,
+			'login': self.database_connection.login
 		})
 
 	def create(self, key: str, data: dict) -> None:
 		handle = self.database_collection.get(key)
 		handle.insert_one(data)
 
-	def read(self, key: str, query: dict) -> dict | bool:
+	def read(self, key: str, query: dict) -> dict:
 		handle = self.database_collection.get(key)
 		if handle is None:
 			return {}

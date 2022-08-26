@@ -1,7 +1,8 @@
 import json
 from database import database
+from auth import *
 from operator import contains
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, jsonify, request, render_template, send_from_directory, session
 from typing import Final
 from octokit import Octokit # https://pypi.org/project/octokitpy/
 
@@ -13,10 +14,42 @@ flask_app = Flask(__name__, template_folder='webapp/html/')
 github_api = Octokit()
 
 @flask_app.route('/', methods=['GET'])
-def route_root():
+def route_root():	
 	return render_template('index.html')
 
-# Serve static html files relative to themselves (i.e. webapp/static/foo.html -> ./foo.html)
+@flask_app.route('/api/logout', methods=['POST'])
+def route_logout():
+	session['logged_in'] = False
+	return jsonify({})
+
+@flask_app.route('/api/login', methods=['POST'])
+def route_login():
+	username = request.args.get('username')
+	password = request.args.get('password')
+	
+	successful_authentication = authenticate(username, password)
+	if successful_authentication is None:
+		return jsonify({'success': False, 'error': 'This username does not exist. Check your spelling and try again'})
+	
+	if successful_authentication:
+		session['logged_in'] = True
+		return jsonify({'success': True})
+
+	return jsonify({'success': False, 'error': 'Invalid password'})
+
+@flask_app.route('/api/signup', methods=['POST'])
+def route_signup():
+	username = request.args.get('username')
+	password = request.args.get('password')
+	
+	if not account_exists(username):
+		database.create(key='login', data={'username': username, 'password': password})
+		session['logged_in'] = True
+		return jsonify({'success': True})
+
+	return jsonify({'success': False, 'error': 'An account with this username already exists'})
+
+# Serve static html files relative to themselves (i.e. webapp/html/foo.html -> ./foo.html)
 @flask_app.route('/<filename>', methods=['GET'])
 def download_file(filename: str):
 	valid_resources = ["png", "jpeg", "jpg"]
@@ -36,12 +69,12 @@ def route_repos():
 
 	# Missing required arguments?
 	if len(args.to_dict()) == 0:
-		return jsonify({'error': 0})
+		return jsonify({'error': 'Missing required arguments'})
 
 	# Username limit exceeded?
 	username = args.get('username')
 	if len(username) > USERNAME_MAX_LEN:
-		return jsonify({'error': 1})
+		return jsonify({'error': 'Username character limit exceeded (Max: 39)'})
 	
 	repos = github_api.repos.list_for_user(username=username)
 
@@ -50,11 +83,11 @@ def route_repos():
 	# Note: This works because, from my observations, github's API uses
 	# "message" only when something unexpected occurred
 	if contains(repos.json, "message"):
-		return jsonify({'error': 2})
+		return jsonify({'error': 'No such username'})
 	
 	# Does this user have any public repos?
 	if len(repos.json) == 0:
-		return jsonify({'error': 3})
+		return jsonify({'error': 'This user has no public repositories'})
 	
 	return repos.json
 
@@ -62,22 +95,25 @@ def route_repos():
 def route_rate():
 	name = request.args.get('name')
 	like_status = database.read(key='rate', query={'name': name})
-	
-	if request.method == 'POST':
-		like_type = 'Starred'
-		if like_status is not None:
-			like_type = 'Starred' if like_status['like'] == 'Not starred' else 'Not starred'
-			database.update(key='rate', query={'name': name}, data={"$set":{'like':like_type}})
+
+	if request.method == 'GET':
+		if like_status is None:
+			return jsonify({'like':'Not starred'})
 		else:
-			database.create(key='rate', data={'name': name, 'like': like_type})
-		
-		return jsonify({'like': like_type})
+			return jsonify({'like': like_status['like']})	
+	
+	if not session.get('logged_in'):
+		return jsonify({'error': 'You must be signed in to perform this action'})
 
-	# GET
-	if like_status is None:
-		return jsonify({'like':'Not starred'})
-
-	return jsonify({'like': like_status['like']})
+	# POST
+	like_type = 'Starred'
+	if like_status is not None:
+		like_type = 'Starred' if like_status['like'] == 'Not starred' else 'Not starred'
+		database.update(key='rate', query={'name': name}, data={"$set":{'like':like_type}})
+	else:
+		database.create(key='rate', data={'name': name, 'like': like_type})
+	
+	return jsonify({'like': like_type})
 
 @flask_app.route('/api/comment', methods=['POST', 'DELETE', 'GET'])
 def route_comment():
@@ -85,9 +121,16 @@ def route_comment():
 	name = request.args.get('name')
 	edit = request.args.get('edit')
 
-	if request.method == 'POST':
+	if request.method == 'GET':
+		return jsonify(database.read(key='comment', query={'name': name}))
+
+	if not session.get('logged_in'):
+		print('not logged in')
+		return jsonify({'error': 'You must be signed in to perform this action'})
+
+	elif request.method == 'POST':
 		if id is None or name is None:
-			return
+			return jsonify({})
 		
 		comment = request.data.decode()
 		if edit is None:
@@ -95,17 +138,14 @@ def route_comment():
 		else:
 			database.update(key='comment', query={'name': name, 'id': id}, data={
 					"$set":{
-						'comment':comment
-					}
+						'comment':comment}
 				})
 
 		return jsonify({})
 
-	elif request.method == 'DELETE':
-		if not database.delete(key='comment', query={'name': name, 'id': id}):
-			return jsonify({'error': 4})
-		
-		return jsonify({})
-
-	# GET
-	return jsonify(database.read(key='comment', query={'name': name}))
+	# DELETE
+	# Failed to delete comment?
+	if not database.delete(key='comment', query={'name': name, 'id': id}):
+		return jsonify({'error': 'Failed to delete comment'})
+	
+	return jsonify({})
