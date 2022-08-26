@@ -64,9 +64,9 @@ def route_rate():
 	like_status = database.read(key='rate', query={'name': name})
 	
 	if request.method == 'POST':
-		like_type = 'Liked'
+		like_type = 'Starred'
 		if like_status is not None:
-			like_type = 'Liked' if like_status['like'] == 'Disliked' else 'Disliked'
+			like_type = 'Starred' if like_status['like'] == 'Not starred' else 'Not starred'
 			database.update(key='rate', query={'name': name}, data={"$set":{'like':like_type}})
 		else:
 			database.create(key='rate', data={'name': name, 'like': like_type})
@@ -74,10 +74,9 @@ def route_rate():
 		return jsonify({'like': like_type})
 
 	# GET
-	if like_status is None or like_status['like'] is None:
-		return jsonify({'like':'No like or dislike'})
+	if like_status is None:
+		return jsonify({'like':'Not starred'})
 
-	# print(jsonify(like_status))
 	return jsonify({'like': like_status['like']})
 
 @flask_app.route('/api/comment', methods=['POST', 'DELETE', 'GET'])
