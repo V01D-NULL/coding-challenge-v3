@@ -1,2 +1,5 @@
 /TODO.md
-/.vscode/*
+/.vscode/
+/mongodb.log
+/mongodb/
+/__pycache__

@@ -5,6 +5,7 @@ API used: Github
 
 1. Install dependencies (python3.5+ required):
 	- python3 -m pip install -r requirements.txt
+	- You can install mongodb for linux [here](https://www.mongodb.com/docs/manual/administration/install-on-linux/)
 
 2. Run the server:
 	- python3 flask-app.py
