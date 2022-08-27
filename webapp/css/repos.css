@@ -73,9 +73,9 @@
 }
 
 @media screen and (max-width: 1300px) {
-	#popup {
-		justify-content: center;
-		display: hidden flex;
-		align-items: center;
-	}
+    #popup {
+        justify-content: center;
+        display: hidden flex;
+        align-items: center;
+    }
 }

@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Repository search</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" type="text/css" media="screen" href="repos.css">
-	<link rel="stylesheet" type="text/css" media="screen" href="animation.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Repository search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="repos.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="animation.css">
 </head>
 <body>
-	<!-- Basic site navigation -->
-	<span id="home" onclick="window.location.href = 'index.html'">Home</span>
-	<br>
-	<span id="log-out" onclick="apiRevokeCredentials()">Logout</span>
+    <!-- Basic site navigation -->
+    <span id="home" onclick="window.location.href = 'index.html'">Home</span>
+    <br>
+    <span id="log-out" onclick="apiRevokeCredentials()">Logout</span>
 
-	<!-- Search form -->
-	<form action="api/repositories" method="GET" id="view-repo-form">
-		<input placeholder="Enter a username.." type="text" name="username" id="username"/>
-		<input type="submit" value="Submit"/> 
-	</form>
-	
-	<!-- Search results -->
-	<div id="repository-results"></div>
+    <!-- Search form -->
+    <form action="api/repositories" method="GET" id="view-repo-form">
+        <input placeholder="Enter a username.." type="text" name="username" id="username"/>
+        <input type="submit" value="Submit"/> 
+    </form>
+    
+    <!-- Search results -->
+    <div id="repository-results"></div>
 
-	<!-- Comments -->
-	<div id="overlay"></div>
-	<div id="popup">
-		<textarea name="comment-box" id="comment-text" cols="30" rows="10"></textarea>
-		<button name="submit-comment">Submit</button>
-		<span id="close-popup" onclick="EnablePopup(false)">&times;</span>
-	</div>
+    <!-- Comments -->
+    <div id="overlay"></div>
+    <div id="popup">
+        <textarea name="comment-box" id="comment-text" cols="30" rows="10"></textarea>
+        <button name="submit-comment">Submit</button>
+        <span id="close-popup" onclick="EnablePopup(false)">&times;</span>
+    </div>
 
 
-	<!-- Scripts -->
-	<script src="repository_search.js"></script>
-	<script src="json.js"></script>
-	<script src="api.js"></script>
+    <!-- Scripts -->
+    <script src="repository_search.js"></script>
+    <script src="json.js"></script>
+    <script src="api.js"></script>
 </body>
 </html>
