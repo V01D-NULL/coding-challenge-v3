@@ -17,7 +17,8 @@ API used: Github
 	- `doc` ~ Documentation
 	- `res` ~ Images, fonts, etc for the webapp
 
-- `flask-app.py` ~ Server/API implementation
+- `flask-app.py` ~ Server/API entry point
+- `auth.py, database.py, route.py` ~ User authentication, database management and API endpoints
 - `webapp/` ~ webapp implementation
 
 ### Features: 
