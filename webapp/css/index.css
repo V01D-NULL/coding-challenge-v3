@@ -1,23 +1,21 @@
 @media only screen {
-	html {
-		animation: fade-in 2s;
-	}
+    html { animation: fade-in 2s; }
 }
 
 h1 {
-	text-align: center;
+    text-align: center;
 }
 
 #bg {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	width: auto;
-	max-width: 40%;
-	padding-top: 5%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    max-width: 40%;
+    padding-top: 5%;
 }
 
 p {
-	font-size: large;
-	text-align: center;
+    font-size: large;
+    text-align: center;
 }

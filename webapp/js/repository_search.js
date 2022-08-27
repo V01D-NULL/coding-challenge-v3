@@ -14,7 +14,7 @@ function EnablePopup(enable=true) {
 	
 	// Reset the div to it's original state
 	if (!enable)
-		popup['div'].innerHTML = popup['html'];
+		ResetPopup();
 }
 
 function ResetPopup() {
@@ -29,6 +29,11 @@ document.getElementById('view-repo-form').addEventListener("submit", (event) => 
 	viewRepositories(username);
 });
 
+// In a professional setting, `resultsDiv.innerHTML` would be cached
+// and a refresh would use some sort of client prediction to reduce the
+// number of calls going out to the API, thus saving bandwidth.
+//
+// However, considering the limited usage and usefulness of this program I decided not to implement it.
 const refreshRepositories = (username) => viewRepositories(username);
 function viewRepositories(username) {
 	// Wait for the promise...
@@ -42,7 +47,7 @@ function viewRepositories(username) {
 				const jsonObj = JsonToObject(element);
 
 				// Request the "like status" of every repository
-				apiRequest(`/api/rate?name=${username}_${jsonObj.name}`).then(like => {
+				apiRequest(`/api/rate?name=${username}_${jsonObj.name}`).then(rating => {
 
 				resultsDiv.innerHTML +=
 					`
@@ -56,8 +61,15 @@ function viewRepositories(username) {
 						<br>
 						<button onclick="enableCommentBox('${username}', '${jsonObj.name}')">Leave a comment</button>
 						<button onclick="viewComments('${username}', '${jsonObj.name}')">View comments</button>
-						<button onclick="apiUpdateLikeStatus('${username}', '${jsonObj.name}')">Like</button>
-						${like.like}
+						<button onclick="apiRateRepository('${username}', '${jsonObj.name}', '${"range-slider_"+jsonObj.name}')">Rate</button>
+						
+						<div>
+						Slider range: [1-5]
+						<br>
+						<input type="range" min="1" max="5" value="2.7" id="${"range-slider_"+jsonObj.name}">
+						</div>
+
+						Average rating: ${rating.average}
 						<br>
 						</p>
 						`;

@@ -14,9 +14,9 @@ class CRUD:
 			'login': self.database_connection.login
 		})
 
-	def create(self, key: str, data: dict) -> None:
+	def create(self, key: str, data: dict) -> any:
 		handle = self.database_collection.get(key)
-		handle.insert_one(data)
+		return handle.insert_one(data)
 
 	def read(self, key: str, query: dict) -> dict:
 		handle = self.database_collection.get(key)

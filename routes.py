@@ -1,4 +1,3 @@
-import json
 from database import database
 from auth import *
 from operator import contains
@@ -6,9 +5,10 @@ from flask import Flask, jsonify, request, render_template, send_from_directory,
 from typing import Final
 from octokit import Octokit # https://pypi.org/project/octokitpy/
 
-# Character limit taken from:
+# Username character limit taken from:
 # https://textcleaner.net/character-count/
 USERNAME_MAX_LEN: Final[int] = 39
+MAX_COMMENT_LENGTH: Final[int] = 128
 
 flask_app = Flask(__name__, template_folder='webapp/html/')
 github_api = Octokit()
@@ -33,6 +33,7 @@ def route_login():
 	
 	if successful_authentication:
 		session['logged_in'] = True
+		session['username'] = username
 		return jsonify({'success': True})
 
 	return jsonify({'success': False, 'error': 'Invalid password'})
@@ -44,12 +45,11 @@ def route_signup():
 	
 	if not account_exists(username):
 		account_create(username, password)
-		session['logged_in'] = True
 		return jsonify({'success': True})
 
 	return jsonify({'success': False, 'error': 'An account with this username already exists'})
 
-# Serve static html files relative to themselves (i.e. webapp/html/foo.html -> ./foo.html)
+# Serve static html files relative to themselves (i.e. webapp/html/foo.html -> foo.html)
 @flask_app.route('/<filename>', methods=['GET'])
 def download_file(filename: str):
 	valid_resources = ["png", "jpeg", "jpg"]
@@ -61,7 +61,6 @@ def download_file(filename: str):
 	# As a result determining which file to load is relatively fast:
 	path = f"webapp/{filename.split('.')[1]}"
 	return send_from_directory(path, filename)
-
 
 @flask_app.route('/api/repositories', methods=['GET'])
 def route_repos():
@@ -94,26 +93,31 @@ def route_repos():
 @flask_app.route('/api/rate', methods=['POST', 'GET'])
 def route_rate():
 	name = request.args.get('name')
-	like_status = database.read(key='rate', query={'name': name})
+	entry = database.read(key='rate', query={'name': name})
 
 	if request.method == 'GET':
-		if like_status is None:
-			return jsonify({'like':'Not starred'})
-		else:
-			return jsonify({'like': like_status['like']})	
-	
-	if not session.get('logged_in'):
-		return jsonify({'error': 'You must be signed in to perform this action'})
+		if entry is None:
+			entry = database.create(key='rate', data={'name': name, 'average': 0, 'collection': dict()})
+			return jsonify({'average': 0})
+		
+		return jsonify({'average': entry['average']})
 
-	# POST
-	like_type = 'Starred'
-	if like_status is not None:
-		like_type = 'Starred' if like_status['like'] == 'Not starred' else 'Not starred'
-		database.update(key='rate', query={'name': name}, data={"$set":{'like':like_type}})
-	else:
-		database.create(key='rate', data={'name': name, 'like': like_type})
+	if session.get('username') is None:
+		return jsonify({'error': 'You must be logged in to perform this action'})
 	
-	return jsonify({'like': like_type})
+	score = int(request.args.get('score'))
+	collection = dict(database.read(key='rate', query={'name': name}).get('collection'))
+	collection[session.get('username')] = score # Store the updated rating
+
+	average = sum(collection.values()) / len(collection)
+	database.update(key='rate', query={'name': name}, data={
+		"$set":{
+			'average': average, 'collection': collection
+		}
+	})
+	
+	return jsonify({'average': average})
+
 
 @flask_app.route('/api/comment', methods=['POST', 'DELETE', 'GET'])
 def route_comment():
@@ -125,7 +129,6 @@ def route_comment():
 		return jsonify(database.read(key='comment', query={'name': name}))
 
 	if not session.get('logged_in'):
-		print('not logged in')
 		return jsonify({'error': 'You must be signed in to perform this action'})
 
 	elif request.method == 'POST':
@@ -133,19 +136,22 @@ def route_comment():
 			return jsonify({})
 		
 		comment = request.data.decode()
+		if len(comment) > MAX_COMMENT_LENGTH:
+			return jsonify({'error': 'Exceeded maximum character length for this comment'})
+
 		if edit is None:
-			database.create(key='comment', data={'name': name, 'id': id, 'comment': comment})
+			database.create(key='comment', data={'name': name, 'username': session.get('username'), 'id': id, 'comment': comment})
 		else:
 			database.update(key='comment', query={'name': name, 'id': id}, data={
 					"$set":{
-						'comment':comment}
+						'comment':comment
+					}
 				})
 
 		return jsonify({})
 
 	# DELETE
-	# Failed to delete comment?
-	if not database.delete(key='comment', query={'name': name, 'id': id}):
+	if not database.delete(key='comment', query={'name': name, 'username': session.get('username'), 'id': id}):
 		return jsonify({'error': 'Failed to delete comment'})
 	
 	return jsonify({})

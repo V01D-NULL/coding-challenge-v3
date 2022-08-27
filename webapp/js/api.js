@@ -4,9 +4,9 @@ async function apiRequest(url, requestArguments, verify=true) {
 	const data = await fetch(url, requestArguments)
 	.then((response) => response.json())
 	.then(data => {
-		if (verify)
-			if (!verifyJson(data))
-				return undefined;
+		if (verify && !verifyJson(data))
+			return undefined;
+		
 		return data;
 	})
 	.catch(error => {
@@ -70,16 +70,16 @@ function apiEditComment(name, id) {
 	});
 }
 
-function apiUpdateLikeStatus(username, repo) {
+function apiRateRepository(username, repo, sliderID) {
 	const requestType = {
 		method: 'POST',
-		body: popup['div'].children.namedItem('comment-box').value,
 		headers: {
 			"Content-type": "application/text; charset=UTF-8"
 		}
 	};
 
-	apiRequest(`/api/rate?name=${username}_${repo}`, requestType).then(_ => refreshRepositories(username));
+	const score = document.getElementById(sliderID).value;
+	apiRequest(`/api/rate?name=${username}_${repo}&score=${score}`, requestType).then(_ => refreshRepositories(username));
 }
 
 function apiSubmitCredentials(id, apiEndpoint, callback) {

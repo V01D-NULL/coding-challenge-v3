@@ -21,4 +21,7 @@ API used: Github
 - `webapp/` ~ webapp implementation
 
 ### Features: 
-- Search for a repository given a username and display information about them. (Error handling included)
+- Search for a repository given a username and display information about them.
+- Rate a repository (results are averaged)
+- Create, delete and edit a comment on a repository
+- Create, log into and out of accounts
