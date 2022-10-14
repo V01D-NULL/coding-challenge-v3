@@ -1,3 +1,3 @@
-octokit.py==0.1.1
+octokitpy==0.15.0
 Flask==2.2.2
 pymongo==4.2.0
