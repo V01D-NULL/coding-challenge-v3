@@ -1,13 +1,10 @@
 "use strict";
 
-const { useState } = React;
+const { useState, createRef } = React;
 
 const FormComponent = ({ event, Id, route, description }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  const onChangeUsername = (e) => setUsername(e.target.value);
-  const onChangePassword = (e) => setPassword(e.target.value);
+  const username = createRef();
+  const password = createRef();
 
   return (
     <>
@@ -23,7 +20,7 @@ const FormComponent = ({ event, Id, route, description }) => {
             required
             name="username"
             placeholder="Username"
-            onChange={onChangeUsername}
+            ref={username}
           />
           <input
             minLength="6"
@@ -31,7 +28,7 @@ const FormComponent = ({ event, Id, route, description }) => {
             required
             name="password"
             placeholder="Password"
-            onChange={onChangePassword}
+            ref={password}
           />
           <input type="submit" value={description} id={Id} />
         </form>
