@@ -7,30 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="index.css">
     <link rel="stylesheet" type="text/css" media="screen" href="animation.css">
-    <h1>Login</h1>
-    <br>
-    <br>
 </head>
 <body>
-    <div style="display: flex; justify-content: center;">
-        <form action="/login" id="login" method="POST">
-            <input type="username" required name="username" placeholder="Username">
-            <input type="password" required name="password" placeholder="Password">
-            <input  type="submit" value="Log in" id="login">
-        </form>
-        <br>
-    </div>
+    <div id="login-root"></div>
 
-    <br>
-    <h1>Sign up</h1>
-    <div style="display: flex; justify-content: center;">
-        <form action="/signup" id="sign-up" method="POST">
-            <input type="username" required name="username" placeholder="Username">
-            <input type="password" required name="password" placeholder="Password">
-            <input type="submit" value="Sign up" id="signup">
-        </form>
-    </div>
-    <script src="login.js"></script>
+    <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+
+    <script type="text/babel" src="login.js"></script>
     <script src="json.js"></script>
     <script src="api.js"></script>
 </body>
