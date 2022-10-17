@@ -40,10 +40,14 @@ const FormComponent = ({ event, Id, route, description }) => {
 const LoginApp = () => {
   const onSubmitOverride = (e, username, password, route) => {
     e.preventDefault();
-    apiSubmitCredentials([username, password], route, () => {
-      if (route === "/login") window.location.href = "index.html";
-      else alert("Successfully created account");
-    });
+    apiSubmitCredentials(
+      [username.current.value, password.current.value],
+      route,
+      () => {
+        if (route === "/login") window.location.href = "index.html";
+        else alert("Successfully created account");
+      }
+    );
   };
   return (
     <>
