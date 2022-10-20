@@ -16,23 +16,23 @@ async function apiRequest(url, requestArguments, verify = true) {
   return data;
 }
 
-function apiSubmitComment(username, repo) {
+function apiSubmitComment(username, repo, comment) {
   const requestType = {
     method: "POST",
-    body: popup["div"].children.namedItem("comment-box").value,
+    body: comment,
     headers: {
       "Content-type": "application/text; charset=UTF-8",
     },
   };
 
-  apiRequest(
+  return apiRequest(
     `/api/comment?name=${username}_${repo}&id=${+new Date()}`,
     requestType
-  ).then((_) => disableCommentBox());
+  );
 }
 
 function apiDeleteComment(name, id) {
-  if (id == undefined || id == null) {
+  if (id === undefined || id === null) {
     console.error("Tried to delete comment with an undefined or null id!");
     return;
   }
@@ -44,40 +44,34 @@ function apiDeleteComment(name, id) {
     },
   };
 
-  apiRequest(`/api/comment?name=${name}&id=${id}`, requestType).then((data) => {
-    // Naming convention: username_repo
-    const [username, repo] = name.split("_");
-    refreshComments(username, repo);
-  });
+  return apiRequest(`/api/comment?name=${name}&id=${id}`, requestType);
 }
 
-function apiEditComment(name, id) {
-  if (id == undefined || id == null) {
+async function apiEditComment(name, id, comment) {
+  if (id === undefined || id === null) {
     console.error("Tried to edit comment with an undefined or null id!");
     return;
   }
 
-  ResetPopup();
-  popup["div"].children
-    .namedItem("submit-comment")
-    .addEventListener("click", (event) => {
-      const requestType = {
-        method: "POST",
-        body: popup["div"].children.namedItem("comment-box").value,
-        headers: {
-          "Content-type": "application/text; charset=UTF-8",
-        },
-      };
+  const requestType = {
+    method: "POST",
+    body: comment,
+    headers: {
+      "Content-type": "application/text; charset=UTF-8",
+    },
+  };
 
-      const [username, repo] = name.split("_");
-      apiRequest(
-        `/api/comment?name=${username}_${repo}&id=${id}&edit=1`,
-        requestType
-      ).then((_) => refreshComments(username, repo));
-    });
+  const [username, repo] = name.split("_");
+  const request = await apiRequest(
+    `/api/comment?name=${username}_${repo}&id=${id}&edit=1`,
+    requestType
+  );
+
+  console.log(request);
+  return request;
 }
 
-function apiRateRepository(username, repo, sliderID) {
+function apiRateRepository(username, repo, score) {
   const requestType = {
     method: "POST",
     headers: {
@@ -85,11 +79,10 @@ function apiRateRepository(username, repo, sliderID) {
     },
   };
 
-  const score = document.getElementById(sliderID).value;
-  apiRequest(
+  return apiRequest(
     `/api/rate?name=${username}_${repo}&score=${score}`,
     requestType
-  ).then((_) => refreshRepositories(username));
+  );
 }
 
 function apiSubmitCredentials([username, password], apiEndpoint, callback) {

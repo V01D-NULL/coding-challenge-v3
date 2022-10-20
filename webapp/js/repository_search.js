@@ -1,115 +1,297 @@
 "use strict";
 
-const popup = { 
-    'div': document.getElementById("popup"),
-    'html': document.getElementById("popup").innerHTML
+const { useState, createRef } = React;
+
+const Repository = ({
+  name,
+  username,
+  description,
+  rating,
+  onRateRepository,
+}) => {
+  const enableCommentBox = (view = false, username, name) => {
+    setPopupEnabled(true);
+    setViewComments(view);
+    fetchComments(username, name, setComments);
+  };
+
+  const submitComment = async (comment) => {
+    try {
+      await apiSubmitComment(username, name, comment);
+    } catch (e) {
+      alert("Failed to submit comment");
+      console.error("Failed to submit comment: " + e);
+    }
+  };
+
+  const slider = createRef();
+  const [popupEnabled, setPopupEnabled] = useState(false);
+  const [viewComments, setViewComments] = useState(false);
+  const [editComments, setEditComments] = useState(false);
+  const [comments, setComments] = useState([]);
+
+  return (
+    <>
+      <hr />
+      <b>{name}</b>
+      <br />
+
+      {description ?? "No description provided"}
+      <br />
+      <button onClick={() => enableCommentBox(username, name)}>
+        Leave a comment
+      </button>
+      <button onClick={() => enableCommentBox(true, username, name)}>
+        View comments
+      </button>
+      <button onClick={(e) => onRateRepository(name, slider.current.value)}>
+        Rate
+      </button>
+      <div>
+        Slider range: [1-5]
+        <br />
+        <input type="range" min="1" max="5" defaultValue="2.7" ref={slider} />
+        Average rating: {rating}
+      </div>
+
+      <>
+        {popupEnabled && (
+          <>
+            <CommentBox
+              view={viewComments}
+              data={comments}
+              closePopup={() => {
+                setPopupEnabled(false);
+                setViewComments(false);
+                setEditComments(false);
+              }}
+              submitComment={(comment) => submitComment(comment)}
+              setEditComment={(_) => {
+                setViewComments(false);
+                setEditComments(true);
+              }}
+              shouldEditComment={editComments}
+              updateHook={setComments}
+            />
+          </>
+        )}
+      </>
+      <br />
+    </>
+  );
 };
 
-const overlay = document.getElementById("overlay");
-const resultsDiv = document.getElementById('repository-results');
+const SearchForm = ({ event }) => {
+  const username = createRef();
+  return (
+    <>
+      <form
+        onSubmit={(e) => event(e, username.current.value)}
+        action="api/repositories"
+        method="GET"
+        id="view-repo-form"
+      >
+        <input
+          placeholder="Enter a username"
+          type="text"
+          name="username"
+          id="username"
+          ref={username}
+        />
+        <input type="submit" value="Submit" />
+      </form>
+    </>
+  );
+};
 
-function EnablePopup(enable=true) {
-    popup['div'].style.display = enable ? 'block' : 'none';
-    overlay.style.display = enable ? 'block' : 'none';
-    
-    // Reset the div to it's original state
-    if (!enable)
-        ResetPopup();
+const Popup = ({ children }) => {
+  return (
+    <>
+      <div id="overlay" style={{ display: "block" }} />
+      <div id="popup" style={{ display: "block" }}>
+        {children}
+      </div>
+    </>
+  );
+};
+
+const ReadOnlyCommentBox = ({
+  data,
+  closePopup,
+  editComment,
+  deleteComment,
+}) => {
+  return (
+    <>
+      <Popup>
+        <span id="close-popup" onClick={() => closePopup()}>
+          &times;
+        </span>
+        <h2>Comments</h2>
+        {data.map(({ comment, name, id }) => (
+          <div key={id}>
+            <hr />
+            <b>Repository: {name} </b>
+            <br />
+            {comment}
+            <br />
+            <button onClick={() => deleteComment(name, id)}>Delete</button>
+            <button onClick={() => editComment()}>Edit</button>
+          </div>
+        ))}
+      </Popup>
+    </>
+  );
+};
+
+const WriteOnlyCommentBox = ({ closePopup, submitComment, editComment }) => {
+  const comment = createRef();
+  return (
+    <>
+      <Popup>
+        <div>
+          <textarea name="comment-box" cols="30" rows="10" ref={comment} />
+          <button
+            onClick={() => {
+              console.log(editComment);
+              if (editComment) editComment(comment.current.value);
+              else submitComment(comment.current.value);
+
+              closePopup();
+            }}
+            name="submit-comment"
+          >
+            Submit
+          </button>
+          <span id="close-popup" onClick={() => closePopup()}>
+            &times;
+          </span>
+        </div>
+      </Popup>
+    </>
+  );
+};
+
+const CommentBox = ({
+  view,
+  data,
+  closePopup,
+  submitComment,
+  setEditComment,
+  shouldEditComment,
+  updateHook,
+}) => {
+  const deleteComment = async (name, id) => {
+    const tmp = [...data];
+    apiDeleteComment(name, id);
+    updateHook(tmp.filter((comment) => comment.id !== id));
+  };
+
+  const editComment = async (comment) => {
+    const [{ name, id }] = data;
+    await apiEditComment(name, id, comment);
+  };
+
+  if (view !== true)
+    return (
+      <WriteOnlyCommentBox
+        closePopup={closePopup}
+        submitComment={submitComment}
+        editComment={shouldEditComment && ((comment) => editComment(comment))}
+      />
+    );
+
+  return (
+    <ReadOnlyCommentBox
+      data={data}
+      closePopup={closePopup}
+      editComment={() => setEditComment(true)}
+      deleteComment={(name, id) => deleteComment(name, id)}
+    />
+  );
+};
+
+function App() {
+  const [repos, setRepos] = useState([]);
+  const [username, setUsername] = useState("");
+
+  const onSubmitOverride = (e, username) => {
+    e.preventDefault();
+    setUsername(username);
+    fetchRepositories(username, setRepos);
+  };
+
+  const onRateRepository = async (repoName, sliderValue) => {
+    try {
+      await apiRateRepository(username, repoName, sliderValue);
+      fetchRepositoryRating(username, repoName, setRepos, repos);
+    } catch (e) {
+      alert("Failed to update rating!");
+      console.error(`Failed to update the rating for ${repoName}: ${e}`);
+    }
+  };
+
+  return (
+    <>
+      <SearchForm event={onSubmitOverride} />
+      {repos.map(({ name, description, rating }) => (
+        <Repository
+          key={name}
+          name={name}
+          username={username}
+          description={description}
+          rating={rating.average}
+          onRateRepository={onRateRepository}
+        />
+      ))}
+    </>
+  );
 }
 
-function ResetPopup() {
-    popup['div'].innerHTML = popup['html'];
+ReactDOM.render(<App />, document.getElementById("root"));
+
+async function fetchRepositoryRating(username, repoName, updateHook, hookData) {
+  const updatedRating = await apiRequest(
+    `/api/rate?name=${username}_${repoName}`
+  );
+
+  const updatedRepository = hookData.find(({ name }) => name == repoName);
+  updatedRepository.rating.average = updatedRating.average;
+
+  updateHook(
+    hookData.map((element) => {
+      if (element.name === repoName) return updatedRepository;
+      return element;
+    })
+  );
 }
 
-// Hook into the submit event of the repo-search-form, then request and load
-// information from the remote api.
-document.getElementById('view-repo-form').addEventListener("submit", (event) => {
-    event.preventDefault();
-    const username = document.getElementById("username").value;
-    viewRepositories(username);
-});
+async function fetchRepositories(username, updateHook) {
+  const data = await apiRequest(`/api/repositories?username=${username}`);
+  const tmp = [];
 
-// In a professional setting, `resultsDiv.innerHTML` would be cached
-// and a refresh would use some sort of client prediction to reduce the
-// number of calls going out to the API, thus saving bandwidth.
-//
-// However, considering the limited usage and usefulness of this program I decided not to implement it.
-const refreshRepositories = (username) => viewRepositories(username);
-function viewRepositories(username) {
-    // Wait for the promise...
-    const jsonDataPromise = apiRequest(`/api/repositories?username=${username}`);
-    jsonDataPromise.then(data => {
-        resultsDiv.style.visibility = 'visible';
-        resultsDiv.innerHTML = '';
-        
-        // Iterate over each repository
-        data.forEach(element => {
-                const jsonObj = JsonToObject(element);
+  // Iterate over each repository
+  for (const element of data) {
+    const { name, description } = JsonToObject(element);
 
-                // Request the "like status" of every repository
-                apiRequest(`/api/rate?name=${username}_${jsonObj.name}`).then(rating => {
+    // Request the "like status" of every repository
+    const rating = await apiRequest(`/api/rate?name=${username}_${name}`);
+    tmp.push({ name: name, description: description, rating: rating });
+  }
 
-                resultsDiv.innerHTML +=
-                    `
-                        <hr>
-                        <b>${jsonObj.name}</b>
-                        <br>
-                        <p>
-                        ${
-                            !jsonObj.description ? 'No description provided' : jsonObj.description
-                        }
-                        <br>
-                        <button onclick="enableCommentBox('${username}', '${jsonObj.name}')">Leave a comment</button>
-                        <button onclick="viewComments('${username}', '${jsonObj.name}')">View comments</button>
-                        <button onclick="apiRateRepository('${username}', '${jsonObj.name}', '${"range-slider_"+jsonObj.name}')">Rate</button>
-                        
-                        <div>
-                        Slider range: [1-5]
-                        <br>
-                        <input type="range" min="1" max="5" value="2.7" id="${"range-slider_"+jsonObj.name}">
-                        </div>
-
-                        Average rating: ${rating.average}
-                        <br>
-                        </p>
-                        `;
-                });
-            });
-        });
+  updateHook(tmp);
 }
 
 // Create a little pop-up window and display all comments for a given repo
-const refreshComments = (username, repo) => viewComments(username, repo);
-function viewComments(username, repo) {
-    const jsonDataPromise = apiRequest(`/api/comment?name=${username}_${repo}`);	
-    
-    jsonDataPromise.then(data => {
-        EnablePopup();
-        popup['div'].innerHTML = 
-            `
-                <span id="close-popup" onclick="EnablePopup(false)">&times;</span>
-                <h2>Comments</h2>
-            `;
+const refreshComments = (username, repo) => fetchComments(username, repo);
+async function fetchComments(username, repo, updateHook) {
+  const data = await apiRequest(`/api/comment?name=${username}_${repo}`);
+  const tmp = [];
 
-        data.forEach(element => {
-            const jsonObj = JsonToObject(element);
-            popup['div'].innerHTML += 
-                `
-                    <hr>
-                    <b>Repository: ${jsonObj.name} </b>
-                    <br>
-                    ${jsonObj.comment}
-                    <br>
-                    <button onclick="apiDeleteComment('${jsonObj.name}', '${jsonObj.id}')">Delete</button>
-                    <button onclick="apiEditComment('${jsonObj.name}', '${jsonObj.id}')">Edit</button>
-                `;
-        });
-    });
+  // Iterate over each commment
+  for (const element of data) {
+    tmp.push(JsonToObject(element));
+  }
+
+  updateHook(tmp);
 }
-
-function enableCommentBox(username, repo) {
-    EnablePopup();
-    popup['div'].children.namedItem('submit-comment').addEventListener("click", event => apiSubmitComment(username, repo));
-}
-
-const disableCommentBox = () => EnablePopup(false);
