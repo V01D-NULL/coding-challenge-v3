@@ -120,6 +120,7 @@ const ReadOnlyCommentBox = ({
   closePopup,
   editComment,
   deleteComment,
+  storeCommentMetadata,
 }) => {
   return (
     <>
@@ -136,7 +137,14 @@ const ReadOnlyCommentBox = ({
             {comment}
             <br />
             <button onClick={() => deleteComment(name, id)}>Delete</button>
-            <button onClick={() => editComment()}>Edit</button>
+            <button
+              onClick={() => {
+                editComment();
+                storeCommentMetadata({ name: name, id: id, comment: comment });
+              }}
+            >
+              Edit
+            </button>
           </div>
         ))}
       </Popup>
@@ -153,7 +161,6 @@ const WriteOnlyCommentBox = ({ closePopup, submitComment, editComment }) => {
           <textarea name="comment-box" cols="30" rows="10" ref={comment} />
           <button
             onClick={() => {
-              console.log(editComment);
               if (editComment) editComment(comment.current.value);
               else submitComment(comment.current.value);
 
@@ -181,6 +188,10 @@ const CommentBox = ({
   shouldEditComment,
   updateHook,
 }) => {
+  // Save the state of the comment a user is editing.
+  // This allows us to index the original item in 'data'
+  const [editedCommentMetadata, setEditedCommentMetadata] = useState({});
+
   const deleteComment = async (name, id) => {
     const tmp = [...data];
     apiDeleteComment(name, id);
@@ -188,8 +199,11 @@ const CommentBox = ({
   };
 
   const editComment = async (comment) => {
-    const [{ name, id }] = data;
-    await apiEditComment(name, id, comment);
+    const { comment: metadataComment } = editedCommentMetadata;
+    const { name, id } = data.find(
+      (element) => metadataComment === element.comment
+    );
+    apiEditComment(name, id, comment);
   };
 
   if (view !== true)
@@ -197,7 +211,10 @@ const CommentBox = ({
       <WriteOnlyCommentBox
         closePopup={closePopup}
         submitComment={submitComment}
-        editComment={shouldEditComment && ((comment) => editComment(comment))}
+        editComment={
+          shouldEditComment &&
+          ((comment, oldComment) => editComment(comment, oldComment))
+        }
       />
     );
 
@@ -205,8 +222,12 @@ const CommentBox = ({
     <ReadOnlyCommentBox
       data={data}
       closePopup={closePopup}
-      editComment={() => setEditComment(true)}
+      editComment={() => setEditComment()}
       deleteComment={(name, id) => deleteComment(name, id)}
+      storeCommentMetadata={(metadata) => {
+        console.log(metadata);
+        setEditedCommentMetadata(metadata);
+      }}
     />
   );
 };

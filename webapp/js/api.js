@@ -61,9 +61,8 @@ async function apiEditComment(name, id, comment) {
     },
   };
 
-  const [username, repo] = name.split("_");
   const request = await apiRequest(
-    `/api/comment?name=${username}_${repo}&id=${id}&edit=1`,
+    `/api/comment?name=${name}&id=${id}&edit=1`,
     requestType
   );
 
