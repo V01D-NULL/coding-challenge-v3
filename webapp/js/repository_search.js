@@ -211,10 +211,7 @@ const CommentBox = ({
       <WriteOnlyCommentBox
         closePopup={closePopup}
         submitComment={submitComment}
-        editComment={
-          shouldEditComment &&
-          ((comment, oldComment) => editComment(comment, oldComment))
-        }
+        editComment={shouldEditComment && ((comment) => editComment(comment))}
       />
     );
 
