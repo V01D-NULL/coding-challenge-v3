@@ -140,7 +140,7 @@ const ReadOnlyCommentBox = ({
             <button
               onClick={() => {
                 editComment();
-                storeCommentMetadata({ name: name, id: id, comment: comment });
+                storeCommentMetadata({ name, id, comment });
               }}
             >
               Edit
