@@ -35,9 +35,7 @@ export default class AccountComponent extends Component {
     apiSubmitCredentials(
       [this.signupField.username, this.signupField.password],
       'signup',
-      () => {
-        alert('Successfully created account');
-      }
+      () => alert('Successfully created account')
     );
   }
 }
