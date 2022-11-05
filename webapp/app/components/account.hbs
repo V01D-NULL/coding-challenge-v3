@@ -1,0 +1,19 @@
+<h1>Login</h1>
+<div style={{"display: flex; justify-content: center;"}}>
+    <form aria-label="login-form" action="http://127.0.0.1:5000/login" method="POST">
+        <Input @type="username" required name="username" placeholder="Username" @value={{this.loginField.username}} />
+        <Input @type="password" required name="password" placeholder="Password" @value={{this.loginField.password}} />
+        <Input @type="submit" @value="Log in" {{on "click" this.login}} />
+    </form>
+    <br>
+</div>
+
+<br>
+<h1>Sign up</h1>
+<div style={{"display: flex; justify-content: center;"}}>
+    <form aria-label="signup-form" action="http://127.0.0.1/signup" method="POST">
+        <Input @type="username" required name="username" placeholder="Username" @value={{this.signupField.username}} />
+        <Input @type="password" required name="password" placeholder="Password" @value={{this.signupField.password}} />
+        <Input @type="submit" @value="Sign up" {{on "click" this.signup}}/>
+    </form>
+</div>

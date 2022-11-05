@@ -2,6 +2,7 @@ from database import database
 from auth import *
 from operator import contains
 from flask import Flask, jsonify, request, render_template, send_from_directory, session
+from flask_cors import CORS
 from typing import Final
 from octokit import Octokit # https://pypi.org/project/octokitpy/
 
@@ -11,6 +12,8 @@ USERNAME_MAX_LEN: Final[int] = 39
 MAX_COMMENT_LENGTH: Final[int] = 128
 
 flask_app = Flask(__name__, template_folder='webapp/html/')
+CORS(flask_app) # Enable CORS on all routes for all methods.
+
 github_api = Octokit()
 
 @flask_app.route('/', methods=['GET'])

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const JsonToObject = (data) => JSON.parse(JSON.stringify(data));
 

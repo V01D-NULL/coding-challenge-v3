@@ -1,7 +1,9 @@
-"use strict";
+'use strict';
+
+const API_URL = 'http://127.0.0.1:5000';
 
 async function apiRequest(url, requestArguments, verify = true) {
-  const data = await fetch(url, requestArguments)
+  const data = await fetch(API_URL + url, requestArguments)
     .then((response) => response.json())
     .then((data) => {
       if (verify && !verifyJson(data)) return undefined;
@@ -18,10 +20,10 @@ async function apiRequest(url, requestArguments, verify = true) {
 
 function apiSubmitComment(username, repo, comment) {
   const requestType = {
-    method: "POST",
+    method: 'POST',
     body: comment,
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
@@ -33,14 +35,14 @@ function apiSubmitComment(username, repo, comment) {
 
 function apiDeleteComment(name, id) {
   if (id === undefined || id === null) {
-    console.error("Tried to delete comment with an undefined or null id!");
+    console.error('Tried to delete comment with an undefined or null id!');
     return;
   }
 
   const requestType = {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
@@ -49,15 +51,15 @@ function apiDeleteComment(name, id) {
 
 async function apiEditComment(name, id, comment) {
   if (id === undefined || id === null) {
-    console.error("Tried to edit comment with an undefined or null id!");
+    console.error('Tried to edit comment with an undefined or null id!');
     return;
   }
 
   const requestType = {
-    method: "POST",
+    method: 'POST',
     body: comment,
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
@@ -72,9 +74,9 @@ async function apiEditComment(name, id, comment) {
 
 function apiRateRepository(username, repo, score) {
   const requestType = {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
@@ -84,11 +86,15 @@ function apiRateRepository(username, repo, score) {
   );
 }
 
-function apiSubmitCredentials([username, password], apiEndpoint, callback) {
+export function apiSubmitCredentials(
+  [username, password],
+  apiEndpoint,
+  callback
+) {
   const requestType = {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
@@ -104,13 +110,13 @@ function apiSubmitCredentials([username, password], apiEndpoint, callback) {
 
 function apiRevokeCredentials() {
   const requestType = {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-type": "application/text; charset=UTF-8",
+      'Content-type': 'application/text; charset=UTF-8',
     },
   };
 
   apiRequest(`/api/logout`, requestType, false).then((_) =>
-    alert("Successfully logged out")
+    alert('Successfully logged out')
   );
 }
