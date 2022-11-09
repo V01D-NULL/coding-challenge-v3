@@ -11,7 +11,7 @@
 <br>
 <h1>Sign up</h1>
 <div style={{"display: flex; justify-content: center;"}}>
-    <form aria-label="signup-form" action="http://127.0.0.1/signup" method="POST">
+    <form aria-label="signup-form" action="http://127.0.0.1:5000/signup" method="POST">
         <Input @type="username" required name="username" placeholder="Username" @value={{this.signupField.username}} />
         <Input @type="password" required name="password" placeholder="Password" @value={{this.signupField.password}} />
         <Input @type="submit" @value="Sign up" {{on "click" this.signup}}/>

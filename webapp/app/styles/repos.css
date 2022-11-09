@@ -8,11 +8,11 @@
     overflow: scroll auto;
     border: thin #000 solid;
     padding: 5px;
-    visibility: hidden;
+    /* visibility: hidden; */
 }
 
 #overlay {
-    display: none;
+    display: block;
     position: fixed;
     left: 0px;
     top: 0px;
@@ -24,7 +24,7 @@
 }
 
 #popup {
-    display: none;
+    display: block;
     position: fixed;
     left: 40%;
     top: 20%;

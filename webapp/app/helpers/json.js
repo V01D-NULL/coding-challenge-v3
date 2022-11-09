@@ -1,12 +1,12 @@
 'use strict';
 
-const JsonToObject = (data) => JSON.parse(JSON.stringify(data));
+export const JsonToObject = (data) => JSON.parse(JSON.stringify(data));
 
-function verifyJson(data) {
+export function verifyJson(data) {
   const jsonObj = JsonToObject(data);
 
   // The API returns {'error' : <string>} upon failure
-  if (jsonObj.error != undefined) {
+  if (jsonObj.error) {
     const err = `API returned error: ${jsonObj.error}`;
 
     console.warn(err);

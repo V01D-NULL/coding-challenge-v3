@@ -1,17 +1,17 @@
 {{!-- Basic site navigation --}}
-<span id="home" onclick="window.location.href = 'index.html'">Home</span>
+<span id="home" {{on "click" this.home}}>Home</span>
 <br>
-<span id="log-out" onclick="apiRevokeCredentials()">Logout</span>
+<span id="log-out" {{on "click" this.api.revokeCredentials}}>Logout</span>
 
 {{!-- Search form --}}
-<form action="http://127.0.0.1/api/repositories" method="GET" id="view-repo-form">
-    <Input placeholder="Enter a username.." @type="text" name="username" id="username" />
-    <Input @type="submit" @value="Submit" />
+<form id="view-repo-form">
+    <Input placeholder="Enter a username.." @type="text" name="username" id="username" @value={{this.username}} />
+    <Input @type="submit" @value="Submit" {{on "click" this.search}}/>
 </form>
 
 {{!-- Search results --}}
-<div id="repository-results"></div>
-
-{{!-- Comments --}}
-<Ui::Overlay/>
-<Ui::Popup/>
+<div id="repository-results">
+    {{#each this.repositories as |repo|}}
+        <Ui::SearchResults @username={{this.username}} @repoName={{repo.name}} @description={{repo.description}} @ratingAverage={{repo.rating.average}} />
+    {{/each}}
+</div>

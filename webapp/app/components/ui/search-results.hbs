@@ -1,0 +1,26 @@
+<hr>
+<b>{{@repoName}}</b>
+<br>
+<p>
+    {{#if @description}}
+        {{@description}}
+    {{else}}
+        No description provided
+    {{/if}}
+    <br>
+
+    {{#if this.showCommentBox}}
+        <Ui::CommentBox @user={{@username}} @repository={{@repoName}} @close={{this.toggleCommentBox}}/>
+        <Ui::Overlay/>
+    {{/if}}
+    <button type="button" {{on "click" this.toggleCommentBox}}>Leave a comment</button>
+    {{!-- <button onclick="viewComments('${username}', '${@repoName}')">View comments</button>
+    <button onclick="apiRateRepository('${username}', '${@repoName}', '${"range-slider_"+@repoName}')">Rate</button> --}}
+<div>
+    Slider range: [1-5]
+    <br>
+    <input type="range" min="1" max="5" value="2.7" id="range-slider_"{{@repoName}}>
+</div>
+    Average rating: {{@ratingAverage}}
+<br>
+</p>

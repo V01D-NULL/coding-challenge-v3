@@ -108,7 +108,7 @@ export function apiSubmitCredentials(
   });
 }
 
-function apiRevokeCredentials() {
+export function apiRevokeCredentials() {
   const requestType = {
     method: 'POST',
     headers: {
@@ -116,6 +116,7 @@ function apiRevokeCredentials() {
     },
   };
 
+  console.log('hello');
   apiRequest(`/api/logout`, requestType, false).then((_) =>
     alert('Successfully logged out')
   );

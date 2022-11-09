@@ -1,0 +1,8 @@
+
+<div id="popup">
+{{@username}}
+{{@repository}}
+    <textarea name="comment-box" id="comment-text" cols="30" rows="10"></textarea>
+    <button name="submit-comment" type="button">Submit</button>
+    <span id="close-popup" {{on "click" @close}}>&times;</span>
+</div>
