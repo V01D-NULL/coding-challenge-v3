@@ -1,7 +1,7 @@
 from hashlib import md5
 from database import database
 
-def authenticate(username, password) -> bool | None:
+def authenticate(username, password):
     if not account_exists(username):
         return None
     

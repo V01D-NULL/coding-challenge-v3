@@ -1,0 +1,17 @@
+{{!-- Basic site navigation --}}
+<span id="home" onclick="window.location.href = 'index.html'">Home</span>
+<br>
+<span id="log-out" onclick="apiRevokeCredentials()">Logout</span>
+
+{{!-- Search form --}}
+<form action="http://127.0.0.1/api/repositories" method="GET" id="view-repo-form">
+    <Input placeholder="Enter a username.." @type="text" name="username" id="username" />
+    <Input @type="submit" @value="Submit" />
+</form>
+
+{{!-- Search results --}}
+<div id="repository-results"></div>
+
+{{!-- Comments --}}
+<Ui::Overlay/>
+<Ui::Popup/>
