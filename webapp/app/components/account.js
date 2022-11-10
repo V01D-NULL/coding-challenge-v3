@@ -21,7 +21,7 @@ export default class AccountComponent extends Component {
   login(event) {
     event.preventDefault();
 
-    this.api.apiSubmitCredentials(
+    this.api.submitCredentials(
       [this.loginField.username, this.loginField.password],
       'login',
       () => this.router.transitionTo('/')
@@ -32,7 +32,7 @@ export default class AccountComponent extends Component {
   signup(event) {
     event.preventDefault();
 
-    this.api.apiSubmitCredentials(
+    this.api.submitCredentials(
       [this.signupField.username, this.signupField.password],
       'signup',
       () => alert('Successfully created account')

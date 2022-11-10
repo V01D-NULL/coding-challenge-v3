@@ -85,39 +85,3 @@ function apiRateRepository(username, repo, score) {
     requestType
   );
 }
-
-export function apiSubmitCredentials(
-  [username, password],
-  apiEndpoint,
-  callback
-) {
-  const requestType = {
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/text; charset=UTF-8',
-    },
-  };
-
-  apiRequest(
-    `/api/${apiEndpoint}?username=${username}&password=${password}`,
-    requestType,
-    false
-  ).then((data) => {
-    if (!data.success) alert(data.error);
-    else callback();
-  });
-}
-
-export function apiRevokeCredentials() {
-  const requestType = {
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/text; charset=UTF-8',
-    },
-  };
-
-  console.log('hello');
-  apiRequest(`/api/logout`, requestType, false).then((_) =>
-    alert('Successfully logged out')
-  );
-}

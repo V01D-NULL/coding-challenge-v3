@@ -16,6 +16,8 @@ CORS(flask_app) # Enable CORS on all routes for all methods.
 
 github_api = Octokit()
 
+shrek = False
+
 @flask_app.route('/', methods=['GET'])
 def route_root():	
     return render_template('index.html')
@@ -35,8 +37,11 @@ def route_login():
         return jsonify({'success': False, 'error': 'This username does not exist. Check your spelling and try again'})
     
     if successful_authentication:
+        print('fjsjflksdf')
         session['logged_in'] = True
         session['username'] = username
+        print(session.get('logged_in'))
+        shrek = True
         return jsonify({'success': True})
 
     return jsonify({'success': False, 'error': 'Invalid password'})
@@ -131,7 +136,7 @@ def route_comment():
     if request.method == 'GET':
         return jsonify(database.read(key='comment', query={'name': name}))
 
-    if not session.get('logged_in'):
+    if not shrek:#session.get('logged_in'):
         return jsonify({'error': 'You must be signed in to perform this action'})
 
     elif request.method == 'POST':

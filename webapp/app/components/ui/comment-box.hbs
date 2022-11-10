@@ -1,8 +1,19 @@
 
 <div id="popup">
-{{@username}}
-{{@repository}}
-    <textarea name="comment-box" id="comment-text" cols="30" rows="10"></textarea>
-    <button name="submit-comment" type="button">Submit</button>
     <span id="close-popup" {{on "click" @close}}>&times;</span>
+    {{#if @writeComment}}
+        <Textarea name="comment-box" id="comment-text" cols="30" rows="10" @value={{this.comment}} />
+        <button name="submit-comment" type="button" {{on "click" (fn this.api.submitComment @user @repository this.comment)}}>Submit</button>
+    {{else}}
+        <h2>Comments</h2>
+        {{#each @comments as |comment|}}
+            <hr>
+            <b>Repository: {{comment.name}} </b>
+            <br>
+            {{comment.comment}}
+            <br>
+            <button {{on "click" (fn this.api.deleteComment comment.name comment.id)}}>Delete</button>
+            <button {{on "click" (fn this.api.editComment   comment.name comment.id)}}>Edit</button>
+        {{/each}}
+    {{/if}}
 </div>
