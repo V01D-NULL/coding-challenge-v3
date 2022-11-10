@@ -1,12 +1,16 @@
 from hashlib import md5
 from database import database
 
-def authenticate(username, password):
+def authenticate(username, password) -> None | bool:
     if not account_exists(username):
         return None
     
     passwd_hash = hash(password)
-    account = database.read(key='login', query={'username': username, 'password': passwd_hash})	
+    account = database.read(key='login', query={'username': username, 'password': passwd_hash})
+
+    if not account:
+        return None
+
     return compare_hashes(passwd_hash, account.get('password'))
 
 def account_exists(username):
